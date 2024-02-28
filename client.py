@@ -9,7 +9,7 @@ import time
 
 BUFFERSIZE = 512
 
-serverAddr = '127.0.0.1'
+serverAddr = '192.168.0.115'
 if len(sys.argv) == 2:
   serverAddr = sys.argv[1]
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
