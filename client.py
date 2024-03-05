@@ -9,7 +9,7 @@ import time
 BUFFERSIZE = 512
 
 # Set the server address
-serverAddr = '192.168.200.189'
+serverAddr = '192.168.137.1'
 if len(sys.argv) == 2:
     serverAddr = sys.argv[1]
 
@@ -272,17 +272,12 @@ while running:
     # Display scores
     player1_score, player2_score = get_score()
     font = pygame.font.SysFont(None, 70)
-    text = font.render(ausgabetext, True, RED)
-    screen.blit(text, [100, 10])
 
-    ausgabetext = str(player2_score)
-    font = pygame.font.SysFont(None, 70)
-    text = font.render(ausgabetext, True, RED)
-    screen.blit(text, [SCREENWIDTH - 125, 10])
     text1 = font.render(str(player1_score), True, RED)
-    screen.blit(text1, [55, 10])
+    screen.blit(text1, [100, 10])
+
     text2 = font.render(str(player2_score), True, RED)
-    screen.blit(text2, [SCREENWIDTH - 80, 10])
+    screen.blit(text2, [SCREENWIDTH - 125, 10])
 
     # Update the window
     pygame.display.flip()
