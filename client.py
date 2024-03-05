@@ -147,6 +147,8 @@ playing_player = 0
 
 ball_exchanges = 0
 
+ball_speed = 1
+
 # Wait for both players to join before starting the game
 while get_playing_player() == 0:
     print("waiting for other player")
@@ -226,6 +228,11 @@ while running:
         playing_player = get_playing_player()
         ballpos_x, ballpos_y, ballmov_x, ballmov_y = get_ball_pos()
         ball_exchanges = get_ball_exchanges()
+        racket_height = full_racket_height - ball_exchanges *10
+        ball_speed = 1 + (ball_exchanges * 0.002)
+
+        if racket_height < 10:
+            racket_height = 10
         racket_height = full_racket_height - ball_exchanges * 5
         
     else:
@@ -233,17 +240,20 @@ while running:
         ballpos_y += ballmov_y
 
         if ballpos_y > SCREENHEIGHT - BALL_DIAMETER or ballpos_y < 0:
+            ballmov_y = ballmov_y * - ball_speed
+        
             ballmov_y = ballmov_y * -1
 
         if ballpos_x < 0 or ballpos_x > SCREENWIDTH - BALL_DIAMETER:
             print("got goal")
             playing_player = 0
             got_goal()
+
             continue
 
         if player == 1:
             if player1.colliderect(ball) and ballmov_x < 0:
-                ballmov_x = ballmov_x * -1
+                ballmov_x = ballmov_x * - ball_speed
                 set_ball_pos(ballpos_x, ballpos_y, ballmov_x, ballmov_y)
                 playing_player = 2
                 set_playing_player(2)
@@ -251,7 +261,7 @@ while running:
 
         elif player == 2:
             if player2.colliderect(ball) and ballmov_x > 0:
-                ballmov_x = ballmov_x * -1
+                ballmov_x = ballmov_x * - ball_speed
                 set_ball_pos(ballpos_x, ballpos_y, ballmov_x, ballmov_y)
                 playing_player = 1
                 set_playing_player(1)
@@ -262,6 +272,13 @@ while running:
     # Display scores
     player1_score, player2_score = get_score()
     font = pygame.font.SysFont(None, 70)
+    text = font.render(ausgabetext, True, RED)
+    screen.blit(text, [100, 10])
+
+    ausgabetext = str(player2_score)
+    font = pygame.font.SysFont(None, 70)
+    text = font.render(ausgabetext, True, RED)
+    screen.blit(text, [SCREENWIDTH - 125, 10])
     text1 = font.render(str(player1_score), True, RED)
     screen.blit(text1, [55, 10])
     text2 = font.render(str(player2_score), True, RED)
