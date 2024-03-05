@@ -138,7 +138,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 # Port 0 means to select an arbitrary unused port
-HOST, PORT = "localhost", 4321
+HOST, PORT = "172.26.80.1", 4321
 
 server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 with server:
