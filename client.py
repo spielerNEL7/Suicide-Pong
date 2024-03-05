@@ -242,7 +242,6 @@ while running:
         if ballpos_y > SCREENHEIGHT - BALL_DIAMETER or ballpos_y < 0:
             ballmov_y = ballmov_y * - ball_speed
         
-            ballmov_y = ballmov_y * -1
 
         if ballpos_x < 0 or ballpos_x > SCREENWIDTH - BALL_DIAMETER:
             print("got goal")
