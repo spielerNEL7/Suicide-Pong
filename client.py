@@ -87,7 +87,7 @@ def got_goal():
     Notify the server that a goal has been scored.
     """
     s.sendall(json.dumps({"got_goal": ""}).encode())
-    s.recv(BUFFERSIZE).decode()
+    print(f"goal: {s.recv(BUFFERSIZE).decode()}")
 
 
 # Initialize player positions and scores
@@ -123,10 +123,19 @@ playing_player = get_playing_player()
 ballpos_x, ballpos_y, ballmov_x, ballmov_y = get_ball_pos()
 
 
+playingplayer_changed = False
+
+
 
 
 def get_data():
-    return  json.loads(s.recv(BUFFERSIZE).decode())
+    data = json.loads(s.recv(BUFFERSIZE).decode())
+    if data == "opponent disconnected":
+        print("You won")
+        exit()
+
+    print(f"data: {data}")
+    return data
 
 
 def send_data():
@@ -136,17 +145,32 @@ def send_data():
         player_pos = player2_y
     #TODO: was, wenn playing player gesetzt wurde? muss auf richtige server antwort warten
     if playing_player == player:
+        a = json.dumps({"playing_player": playing_player, "ball_pos": [ballpos_x, ballpos_y, ballmov_x, ballmov_y], "own_position": player_pos})
+        print(f"send: {a}")
         s.sendall(json.dumps({"playing_player": playing_player, "ball_pos": [ballpos_x, ballpos_y, ballmov_x, ballmov_y], "own_position": player_pos}).encode())
+    
+    elif playingplayer_changed:
+        a = json.dumps({"playing_player": playing_player, "ball_pos": [ballpos_x, ballpos_y, ballmov_x, ballmov_y], "own_position": player_pos})
+        print(f"send: {a}")
+        s.sendall(json.dumps({"playing_player": playing_player, "ball_pos": [ballpos_x, ballpos_y, ballmov_x, ballmov_y], "own_position": player_pos}).encode())
+
     else:
+        a = json.dumps({"own_position": player_pos})
+        print(f"send: {a}")
         s.sendall(json.dumps({"own_position": player_pos}).encode())
 
 
 send_data()
 
+
 # Main game loop
 while running:
 
-    playing_player, x, y, mov_x, mov_y, opponent_pos, player1_score, player2_score, ball_exchanges = get_data()
+    playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = get_data()
+
+    if playingplayer_changed:
+        if playing_player != player:
+            playingplayer_changed = False
 
     if player == 1:
         player2_y = opponent_pos
@@ -218,7 +242,7 @@ while running:
 
         if racket_height < 10:
             racket_height = 10
-        racket_height = full_racket_height - ball_exchanges * 5
+
         
     else:
         ball_speed = 1 + (ball_exchanges * 0.002)
@@ -231,21 +255,24 @@ while running:
 
         if ballpos_x < 0 or ballpos_x > SCREENWIDTH - BALL_DIAMETER:
             print("got goal")
+            print(ballpos_x)
             playing_player = 0
             got_goal()
-
+            s.sendall(json.dumps({"get_data": ""}).encode())
             continue
 
         if player == 1:
             if player1.colliderect(ball) and ballmov_x < 0:
                 ballmov_x = ballmov_x * -1
                 playing_player = 2
+                playingplayer_changed = True
                 ball_exchanges += 1
 
         elif player == 2:
             if player2.colliderect(ball) and ballmov_x > 0:
                 ballmov_x = ballmov_x * -1
                 playing_player = 1
+                playingplayer_changed = True
                 ball_exchanges += 1
         
 
