@@ -189,18 +189,23 @@ def run_once(loop):
 while running:
 
     if won:
+        #for event in pygame.event.get():
+        #    pass
         screen.fill(BLACK)
         font = pygame.font.SysFont(None, 70)
 
         text = font.render("You Won!", True, RED)
         screen.blit(text, [100, 10])
         pygame.display.flip()
+
+        #clock.tick(60)
+        #continue
     
-    if not won:
-        loop.create_task(get_data())
+
+    loop.create_task(get_data())
 
 
-        run_once(loop)
+    run_once(loop)
 
     if playingplayer_changed:
         if playing_player != player:
@@ -291,8 +296,7 @@ while running:
             print("got goal")
             print(ballpos_x)
             playing_player = 0
-            if not won:
-                got_goal()
+            got_goal()
             s.sendall(json.dumps({"get_data": ""}).encode())
             continue
 
@@ -321,16 +325,16 @@ while running:
     screen.blit(text2, [SCREENWIDTH - 125, 10])
 
     # Update the window
-    if not won:
-        pygame.display.flip()
 
-        try:
-            send_data()
-        except Exception as ex:
-            if won:
-                pass
-            else:
-                raise ex
+    pygame.display.flip()
+
+    try:
+        send_data()
+    except Exception as ex:
+        if won:
+            pass
+        else:
+            raise ex
     # Set frame rate
     clock.tick(60)
 
