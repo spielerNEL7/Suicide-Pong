@@ -42,10 +42,8 @@ def spawn_ball():
     Function to spawn a new ball with random position and movement direction.
     """
     global ballmov_x, ballmov_y
-    #ballmov_x = 4
-    #ballmov_y = 4
-    ballmov_x = 0.5
-    ballmov_y = 0.5
+    ballmov_x = 4
+    ballmov_y = 4
     
     if bool(random.getrandbits(1)):
         ballmov_x *= -1

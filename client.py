@@ -5,6 +5,8 @@ import socket
 import json
 import time
 
+import asyncio
+
 # Define the size of the message buffer
 BUFFERSIZE = 512
 
@@ -126,16 +128,27 @@ ballpos_x, ballpos_y, ballmov_x, ballmov_y = get_ball_pos()
 playingplayer_changed = False
 
 
+opponent_pos = 0
 
 
-def get_data():
+loop = asyncio.get_event_loop()
+
+getting_data = False
+
+async def get_data():
     data = json.loads(s.recv(BUFFERSIZE).decode())
     if data == "opponent disconnected":
         print("You won")
         exit()
+    
+    global playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges, getting_data
+
+    playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = data
+
+    getting_data = False
 
     print(f"data: {data}")
-    return data
+    #return data
 
 
 def send_data():
@@ -162,11 +175,23 @@ def send_data():
 
 send_data()
 
+def run_once(loop):
+    loop.call_soon(loop.stop)
+    loop.run_forever()
 
 # Main game loop
 while running:
 
-    playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = get_data()
+    #playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = get_data()
+
+
+    
+    print(getting_data)
+    if not getting_data:
+        getting_data = True
+        loop.create_task(get_data())
+
+    run_once(loop)
 
     if playingplayer_changed:
         if playing_player != player:
