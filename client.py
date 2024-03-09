@@ -9,7 +9,7 @@ import time
 BUFFERSIZE = 512
 
 # Set the server address
-serverAddr = '192.168.137.1'
+serverAddr = '127.0.0.1'
 if len(sys.argv) == 2:
     serverAddr = sys.argv[1]
 
