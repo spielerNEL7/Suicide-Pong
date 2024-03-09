@@ -5,6 +5,7 @@ import json
 
 import time
 
+
 BUFFERSIZE = 512
 
 SCREENWIDTH = 640
@@ -66,17 +67,27 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
 
         while True:
-            data = self.request.recv(1024)
+            try:
+                data = self.request.recv(1024)
+            except:
+                if self.this_match.player1 == self:
+                    self.this_match.player2.request.sendall(json.dumps("opponent disconnected").encode())
+                else:
+                    self.this_match.player1.request.sendall(json.dumps("opponent disconnected").encode())
+                continue
+
             if self.this_match.player1 == self:
                 self.this_match.last_conn_player1 = time.time()
                 if self.this_match.last_conn_player2 is not None and self.this_match.last_conn_player2 < time.time() - 1:
                     # player 2 has disconnected
-                    self.end_connection()
+                    self.request.sendall(json.dumps("opponent disconnected").encode())
+                    continue
             else:
                 self.this_match.last_conn_player2 = time.time()
                 if self.this_match.last_conn_player1 is not None and self.this_match.last_conn_player1 < time.time() - 1:
                     # player 2 has disconnected
-                    self.end_connection()
+                    self.request.sendall(json.dumps("opponent disconnected").encode())
+                    continue
 
 
             if not data:
@@ -168,12 +179,6 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         print(f"send: {self.this_match.playing_player, self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y, opponent_pos, self.this_match.player1_score, self.this_match.player2_score, self.this_match.ball_exchanges}")
         self.request.sendall(json.dumps([self.this_match.playing_player, self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y, opponent_pos, self.this_match.player1_score, self.this_match.player2_score, self.this_match.ball_exchanges]).encode())
 
-
-    def end_connection(self):
-        self.request.sendall(json.dumps("opponent disconnected").encode())
-        self.server.socket.shutdown()
-        self.server.socket.close()
-        self.server.server_close()
                 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):

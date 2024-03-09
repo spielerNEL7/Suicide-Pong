@@ -133,22 +133,28 @@ opponent_pos = 0
 
 loop = asyncio.get_event_loop()
 
-getting_data = False
+won = False
+
 
 async def get_data():
     data = json.loads(s.recv(BUFFERSIZE).decode())
+    print(f"data: {data}")
     if data == "opponent disconnected":
         print("You won")
-        exit()
-    
-    global playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges, getting_data
+        """while len(asyncio.all_tasks(loop)):
+            run_once(loop)
+        loop.shutdown_asyncgens()
+        loop.close()"""
 
+        global won
+        won = True
+        return
+    
+    global playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges
+
+    
     playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = data
 
-    getting_data = False
-
-    print(f"data: {data}")
-    #return data
 
 
 def send_data():
@@ -182,14 +188,18 @@ def run_once(loop):
 # Main game loop
 while running:
 
-    #playing_player, ballpos_x, ballpos_y, ballmov_x, ballmov_y, opponent_pos, player1_score, player2_score, ball_exchanges = get_data()
+    if won:
+        screen.fill(BLACK)
+        font = pygame.font.SysFont(None, 70)
 
+        text = font.render("You Won!", True, RED)
+        screen.blit(text, [100, 10])
+        pygame.display.flip()
+        clock.tick(10)
+        continue
 
-    
-    print(getting_data)
-    if not getting_data:
-        getting_data = True
-        loop.create_task(get_data())
+    loop.create_task(get_data())
+
 
     run_once(loop)
 
@@ -313,8 +323,13 @@ while running:
     # Update the window
     pygame.display.flip()
 
-    send_data()
-
+    try:
+        send_data()
+    except Exception as ex:
+        if won:
+            pass
+        else:
+            raise ex
     # Set frame rate
     clock.tick(60)
 
