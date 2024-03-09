@@ -78,12 +78,17 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
             if not data:
                 break
+
             data = data.decode()
             data = [e + "}" for e in data.split("}") if e]
+
+            print(data)
 
             for d in data:
                 d = json.loads(d)
 
+
+################################################
                 if "player" in d:
                     # Assign players based on availability
 
@@ -106,28 +111,13 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                             self.this_match.playing_player = 2
                         else:
                             self.this_match.playing_player = 1
-
-
-
+                
                 elif "get_playing_player" in d:
                     self.request.sendall(json.dumps(str(self.this_match.playing_player)).encode())
-                elif "set_playing_player" in d:
-                    self.this_match.playing_player = d["set_playing_player"]
-                    self.this_match.ball_exchanges += 1
+                
                 elif "get_ball_pos" in d:
                     self.request.sendall(json.dumps([self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y]).encode())
-                elif "get_opponent_pos" in d:
-                    if self == self.this_match.player1:
-                        self.request.sendall(json.dumps(self.this_match.player2_pos).encode())
-                    else:
-                        self.request.sendall(json.dumps(self.this_match.player1_pos).encode())
-                elif "set_own_position" in d:
-                    if self == self.this_match.player1:
-                        self.this_match.player1_pos = d["set_own_position"]
-                    else:
-                        self.this_match.player2_pos = d["set_own_position"]
-                elif "set_ball_pos" in d:
-                    self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y = d["set_ball_pos"]
+
                 elif "got_goal" in d:
                     self.this_match.ball_exchanges = 0
                     self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y = spawn_ball()
@@ -141,13 +131,37 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                         self.this_match.player1_score += 1
                     self.request.sendall(json.dumps("done").encode())
                     print(self.this_match.playing_player)
-                elif "get_score" in d:
-                    self.request.sendall(json.dumps([self.this_match.player1_score, self.this_match.player2_score]).encode())
-                elif "get_ball_exchanges" in d:
-                    self.request.sendall(json.dumps(self.this_match.ball_exchanges).encode())
-                else:
-                    print(f"No function {d}")
-                    exit
+##############################################################################################
+
+                elif "own_position" in d:
+                    if self == self.this_match.player1:
+                        self.this_match.player1_pos = d["own_position"]
+                    else:
+                        self.this_match.player2_pos = d["own_position"]
+                    self.send_data()
+                
+                elif "playing_player" in d:
+                    self.this_match.playing_player = d["set_playing_player"]
+                    self.this_match.ball_exchanges += 1
+                    self.send_data()
+                
+                elif "ball_pos" in d:
+                    self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y = d["set_ball_pos"]
+                    self.send_data()
+
+            
+            
+
+
+    def send_data(self):
+        opponent_pos = 0
+        if self == self.this_match.player1:
+            opponent_pos = self.this_match.player2_pos
+        else:
+            opponent_pos = self.this_match.player1_pos
+
+        self.request.sendall(json.dumps([self.this_match.playing_player, self.this_match.ballpos_x, self.this_match.ballpos_y, self.this_match.ballmov_x, self.this_match.ballmov_y, opponent_pos, self.this_match.player1_score, self.this_match.player2_score, self.this_match.ball_exchanges]).encode())
+
 
     def end_connection(self):
         self.request.sendall(json.dumps("opponent disconnected").encode())
