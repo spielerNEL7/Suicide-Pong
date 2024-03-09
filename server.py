@@ -73,12 +73,14 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 if self.this_match.player1 == self:
                     try:
                         self.this_match.player2.request.sendall(json.dumps("opponent disconnected").encode())
+                        matches.remove(self.this_match)
                     except OSError:
                         pass
                     raise ex
                 else:
                     try:
                         self.this_match.player1.request.sendall(json.dumps("opponent disconnected").encode())
+                        matches.remove(self.this_match)
                     except OSError:
                         pass
                     raise ex
@@ -89,16 +91,31 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 if self.this_match.last_conn_player2 is not None and self.this_match.last_conn_player2 < time.time() - 1:
                     # player 2 has disconnected
                     self.request.sendall(json.dumps("opponent disconnected").encode())
+                    matches.remove(self.this_match)
                     break
             else:
                 self.this_match.last_conn_player2 = time.time()
                 if self.this_match.last_conn_player1 is not None and self.this_match.last_conn_player1 < time.time() - 1:
                     # player 2 has disconnected
                     self.request.sendall(json.dumps("opponent disconnected").encode())
+                    matches.remove(self.this_match)
                     break
 
 
             if not data:
+                if self.this_match.player1 == self:
+                    try:
+                        self.this_match.player2.request.sendall(json.dumps("opponent disconnected").encode())
+                        matches.remove(self.this_match)
+                    except OSError:
+                        pass
+                else:
+                    try:
+                        self.this_match.player1.request.sendall(json.dumps("opponent disconnected").encode())
+                        matches.remove(self.this_match)
+                    except OSError:
+                        pass
+                matches.remove(self.this_match)
                 break
 
             data = json.loads(data.decode())
@@ -108,6 +125,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
 
             if len(data) == 1:
+                if "close_conn" in data:
+                    matches.remove(self.this_match)
+                    break
+
                 if "player" in data:
                     # Assign players based on availability
                     if len(matches) == 0 or matches[-1].player2 != None:

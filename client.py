@@ -118,7 +118,20 @@ ball_speed = 1
 # Wait for both players to join before starting the game
 while get_playing_player() == 0:
     print("waiting for other player")
-    time.sleep(0.1)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            s.sendall(json.dumps({"close_conn": ""}).encode())
+            s.shutdown(0)
+            s.close()
+            exit()
+        screen.fill(BLACK)
+        font = pygame.font.SysFont(None, 70)
+
+        text = font.render("waiting for other player", True, RED)
+        screen.blit(text, [100, 10])
+        pygame.display.flip()
+
+        clock.tick(60)
 
 # Get playing player and initial ball position from the server
 playing_player = get_playing_player()
@@ -141,10 +154,7 @@ async def get_data():
     print(f"data: {data}")
     if data == "opponent disconnected":
         print("You won")
-        """while len(asyncio.all_tasks(loop)):
-            run_once(loop)
-        loop.shutdown_asyncgens()
-        loop.close()"""
+
 
         global won
         won = True
@@ -162,7 +172,7 @@ def send_data():
         player_pos = player1_y
     else:
         player_pos = player2_y
-    #TODO: was, wenn playing player gesetzt wurde? muss auf richtige server antwort warten
+
     if playing_player == player:
         a = json.dumps({"playing_player": playing_player, "ball_pos": [ballpos_x, ballpos_y, ballmov_x, ballmov_y], "own_position": player_pos})
         print(f"send: {a}")
@@ -189,8 +199,9 @@ def run_once(loop):
 while running:
 
     if won:
-        #for event in pygame.event.get():
-        #    pass
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                running = False
         screen.fill(BLACK)
         font = pygame.font.SysFont(None, 70)
 
@@ -198,8 +209,8 @@ while running:
         screen.blit(text, [100, 10])
         pygame.display.flip()
 
-        #clock.tick(60)
-        #continue
+        clock.tick(60)
+        continue
     
 
     loop.create_task(get_data())
