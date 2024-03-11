@@ -3,7 +3,6 @@ from pygame.locals import *
 import sys
 import socket
 import json
-import time
 
 import asyncio
 
