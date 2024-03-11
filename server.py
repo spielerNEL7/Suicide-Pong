@@ -42,7 +42,6 @@ def spawn_ball():
     """
     Function to spawn a new ball with random position and movement direction.
     """
-    global ballmov_x, ballmov_y
     ballmov_x = 4
     ballmov_y = 4
     
@@ -92,14 +91,14 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                     # player 2 has disconnected
                     self.request.sendall(json.dumps("opponent disconnected").encode())
                     matches.remove(self.this_match)
-                    break
+                    return
             else:
                 self.this_match.last_conn_player2 = time.time()
                 if self.this_match.last_conn_player1 is not None and self.this_match.last_conn_player1 < time.time() - 1:
                     # player 2 has disconnected
                     self.request.sendall(json.dumps("opponent disconnected").encode())
                     matches.remove(self.this_match)
-                    break
+                    return
 
 
             if not data:
