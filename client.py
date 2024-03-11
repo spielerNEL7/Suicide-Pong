@@ -295,7 +295,7 @@ while running:
 
         
     else:
-        ball_speed = 1 + (ball_exchanges * 0.002)
+        ball_speed = 1 + (ball_exchanges * 0.01)
         ballpos_x += ballmov_x * ball_speed
         ballpos_y += ballmov_y * ball_speed
 
