@@ -21,7 +21,7 @@ To get started with the game, follow these installation steps:
 
 1. Clone the repository to your local machine using the following command:
     ```
-    git clone <repository_url>
+    git clone https://github.com/spielerNEL7/Suicide-Pong.git
     ```
 
 2. Navigate to the directory where you cloned the repository.
@@ -66,7 +66,7 @@ The repository consists of the following files:
 
 - Each time a player misses the ball, the opposing player scores a point.
 
-- Each time the ball is successfully defended by a player, the bars of both players are reduced in size. This continues until the minimum size has been reached or one of the two players scores a point. The bar size is then reset.  
+- Each time the ball is successfully defended by a player, the bars of both players are reduced in size. This continues until the minimum size has been reached or one of the two players scores a point. The bar size is then reset. With each defense the ballspeed also increases slightly.
 
 ### Acknowledgments
 
