@@ -213,7 +213,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 # Define server host and port
-HOST, PORT = "192.168.56.1", 4321
+HOST, PORT = "0.0.0.0", 4321
 
 # Create a threaded TCP server
 server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
